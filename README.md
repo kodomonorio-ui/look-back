@@ -1,43 +1,48 @@
-# Website Starter
+# 沼落ち認定証
 
-The bare minimum deployable website. Your first step to building with Gista.js.
+過去の「絶対ハマらない」と現在の熱量を並べ、沼落ちまでの流れを楽しむスマホ向けWebアプリです。バックエンドや外部APIを使わないMVPです。
 
-## Quick Start
-
-Need help getting set up? Follow the step-by-step guide at https://gistajs.com/learn.
-
-### 1. Deploy to Vercel
-
-Click "Use this template" on GitHub, then import your new repo to Vercel.
-
-### 2. Run locally
+## 起動方法
 
 ```bash
 pnpm install
+pnpm atlas
 pnpm dev
 ```
 
-## What's included
+型チェックは `pnpm tsc`、本番ビルドは `pnpm build` で実行できます。
 
-- React Router v7 (SPA mode)
-- Tailwind CSS v4 + daisyUI v5
-- Vite dev server (hot reload)
-- Deployable anywhere (Vercel, Render, etc.)
+## 使い方
 
-## What's NOT included
+1. 「予想」の無限スクロールフィードで、候補への現在の気持ちを回答します。候補の表示順は端末時刻の毎日0:00に更新されます。
+2. 「ハマった！」で対象、熱量、きっかけを記録します。
+3. 「分析」で回答から沼落ちまでの時系列を振り返ります。
+4. 「認定証」で縦長カードを共有、またはPNG画像として保存します。
 
-- No backend
-- No database
-- No authentication
-- No environment variables
-- No external services
+初回から試せるサンプルデータ入りです。右上の設定からサンプル状態へ初期化できます。
 
-## Next steps
+## データ保存
 
-Ready for more? Check other starters for auth, database, and more.
+回答と報告はブラウザの `localStorage`（キー: `numaochi-data-v1`）だけに保存されます。視聴履歴やSNS投稿を取得せず、外部サーバーにも送信しません。ブラウザのサイトデータを消すと記録も消えます。
 
-## Issues
+## 将来の拡張案
 
-Issues are welcome in this repository if something looks off.
+- 任意のクラウド同期と機種変更時のデータ移行
+- ユーザーが明示的に選んだコンテンツ情報の取り込み
+- 認定証テンプレート、色、ステッカーの追加
+- 匿名・公開範囲を選べるコミュニティ投稿
 
-Direct PRs are not accepted here.
+外部連携を追加する場合も、本人の明示的な操作と同意を前提にし、自動的な履歴収集は行わない設計を想定しています。
+
+## Google Trends連携
+
+日本の「Trending now」公式RSSを15分ごとに取得し、承認済み候補をカーソルベースで配信します。画面には出典リンクを表示します。事故・災害・事件・政治・投機などは自動除外し、コンテンツ分類が曖昧な語句は `/admin/trends?key=ADMIN_SECRET` で承認するまで公開しません。
+
+環境変数：
+
+- `DB_URL`: ローカルは `file:data/dev.db`（省略可）、本番は永続LibSQL URL
+- `DB_AUTH_TOKEN`: リモートDB利用時のトークン
+- `CRON_SECRET`: `/api/cron/trends` のBearer認証
+- `ADMIN_SECRET`: 管理承認画面のアクセスキー
+
+Vercel Cronは `vercel.json` で15分間隔に設定しています。ローカルでは `pnpm trends:sync` で手動同期できます。RSSまたはDBが利用できない場合、予想画面はアプリ内の既存候補へ自動的にフォールバックします。
